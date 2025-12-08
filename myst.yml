@@ -1,0 +1,81 @@
+# See docs at: https://mystmd.org/guide/frontmatter
+version: 1
+project:
+  id: aa750e10-38c5-4f55-87c8-c1a1b5645e1c
+  title: ML Refresher
+  description: A comprehensive learning repository for ML concepts, PyTorch, and LLM interview prep
+  keywords:
+    - machine learning
+    - pytorch
+    - llm
+    - interview prep
+  # Enable Thebe for live code execution (requires local Jupyter server)
+  # Start Jupyter: uv run jupyter lab --NotebookApp.token=mlrefresher --NotebookApp.allow_origin='*'
+  jupyter:
+    server:
+      url: http://localhost:8888/
+      token: mlrefresher
+  toc:
+    - file: README.md
+    - title: PyTorch Refresher
+      children:
+        - title: "01: Tensors"
+          children:
+            - file: pytorch_refresher/01_tensors/README.md
+            - file: pytorch_refresher/01_tensors/lesson.ipynb
+              title: Code Exercise
+        - title: "02: Reshaping"
+          children:
+            - file: pytorch_refresher/02_tensor_reshaping/README.md
+            - file: pytorch_refresher/02_tensor_reshaping/lesson.ipynb
+              title: Code Exercise
+        - title: "03: Indexing & Slicing"
+          children:
+            - file: pytorch_refresher/03_tensor_indexing_slicing/README.md
+            - file: pytorch_refresher/03_tensor_indexing_slicing/lesson.ipynb
+              title: Code Exercise
+        - title: "04: Math Operations"
+          children:
+            - file: pytorch_refresher/04_tensor_math_operations/README.md
+            - file: pytorch_refresher/04_tensor_math_operations/lesson.ipynb
+              title: Code Exercise
+        - title: "05: Gradients"
+          children:
+            - file: pytorch_refresher/05_tensor_gradients/README.md
+            - file: pytorch_refresher/05_tensor_gradients/lesson.ipynb
+              title: Code Exercise
+        - title: "06: Linear Regression"
+          children:
+            - file: pytorch_refresher/06_linear_regression/README.md
+            - file: pytorch_refresher/06_linear_regression/lesson.ipynb
+              title: Code Exercise
+        - title: "07: Data Management"
+          children:
+            - file: pytorch_refresher/07_data_management/README.md
+            - file: pytorch_refresher/07_data_management/lesson.ipynb
+              title: Code Exercise
+        - title: "08: Data Transforms"
+          children:
+            - file: pytorch_refresher/08_data_transforms/README.md
+            - file: pytorch_refresher/08_data_transforms/lesson.ipynb
+              title: Code Exercise
+        - title: "09: DataLoaders"
+          children:
+            - file: pytorch_refresher/09_dataloaders/README.md
+            - file: pytorch_refresher/09_dataloaders/lesson.ipynb
+              title: Code Exercise
+        - title: "10: Neural Networks"
+          children:
+            - file: pytorch_refresher/10_fashionmnist_nn/README.md
+            - file: pytorch_refresher/10_fashionmnist_nn/lesson.ipynb
+              title: Code Exercise
+    - title: LLM Interview Questions
+      children:
+        - file: interview_questions/README.md
+          title: Overview
+        - pattern: interview_questions/*/README.md
+        - pattern: interview_questions/*/*.ipynb
+site:
+  template: book-theme
+  options:
+    logo_text: ML Refresher
