@@ -17,6 +17,31 @@ uv sync
 uv run python <script_path>
 ```
 
+## Interactive Book UI
+
+This repo includes Jupyter Book for an interactive browsing experience:
+
+```bash
+# Start the local book server (read-only)
+uv run jupyter-book start
+```
+
+### With Live Code Execution
+
+To run code interactively in the browser, start a Jupyter server alongside the book:
+
+```bash
+# Terminal 1: Start Jupyter server for code execution
+uv run jupyter lab --NotebookApp.token=mlrefresher --NotebookApp.allow_origin='*'
+
+# Terminal 2: Start the book UI
+uv run jupyter-book start
+```
+
+Then click the "power" button on any notebook page to connect to the Jupyter kernel and run code cells.
+
+The book auto-discovers new content - just add a folder with a `README.md` and it appears in the navigation.
+
 ## Repository Structure
 
 ```
