@@ -1,4 +1,4 @@
-.PHONY: book jupyter serve stop help
+.PHONY: book jupyter serve stop cli help
 
 # Start the book UI only (read-only, no code execution)
 book:
@@ -29,6 +29,10 @@ stop:
 	@pkill -f "myst" 2>/dev/null || true
 	@echo "All servers stopped"
 
+# Run the mlr CLI (pass ARGS, e.g. make cli ARGS="content topics")
+cli:
+	uv run mlr $(ARGS)
+
 # Show help
 help:
 	@echo "ML Refresher - Interactive Book Commands"
@@ -36,6 +40,7 @@ help:
 	@echo "  make book    - Start book UI (read-only, no code execution)"
 	@echo "  make serve   - Start book with live code execution"
 	@echo "  make stop    - Stop all servers"
+	@echo "  make cli     - Run mlr CLI (e.g. make cli ARGS=\"content topics\")"
 	@echo ""
 	@echo "For code execution: run 'make serve', then click the power"
 	@echo "button on any notebook page to connect to the Jupyter kernel."
