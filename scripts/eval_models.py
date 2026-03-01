@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
-from openai import OpenAI
+from openrouter import OpenRouter
 
 load_dotenv()
 
@@ -15,10 +15,7 @@ if not API_KEY:
     print("ERROR: OPENROUTER_API_KEY not set in environment or .env")
     sys.exit(1)
 
-client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key=API_KEY,
-)
+client = OpenRouter(api_key=API_KEY)
 
 MODELS = [
     "minimax/minimax-m2.5",
@@ -43,11 +40,9 @@ OUTPUT_FILE = Path(__file__).resolve().parent / "eval_results.txt"
 def chat(model: str, messages: list[dict]) -> str:
     """Send a chat completion request and return the response text."""
     try:
-        resp = client.chat.completions.create(
+        resp = client.chat.send(
             model=model,
             messages=messages,
-            max_tokens=1024,
-            temperature=0.7,
         )
         return resp.choices[0].message.content
     except Exception as e:
