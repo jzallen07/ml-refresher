@@ -17,9 +17,20 @@ uv sync
 uv run python <script_path>
 ```
 
+## Interactive TUI (Coming Soon)
+
+A terminal-based interactive tutor and interview simulator powered by LLMs:
+
+- **Teacher mode**: Socratic tutor that drives guided lessons through the PyTorch content, adapts to your level, and runs code demos
+- **Interviewer mode**: Mock ML interviewer that draws from the 50+ question bank, evaluates your answers, and gives scored feedback
+
+Both modes share persistent knowledge state across sessions with spaced repetition for long-term retention.
+
+See [docs/tui_prd.md](./docs/tui_prd.md) for the full design and [docs/model_guide.md](./docs/model_guide.md) for LLM model recommendations.
+
 ## Interactive Book UI
 
-This repo includes Jupyter Book for an interactive browsing experience:
+This repo also includes Jupyter Book for a browser-based reading experience:
 
 ```bash
 # Start the local book server (read-only)
@@ -49,6 +60,9 @@ ml-refresher/
   pytorch_refresher/     # PyTorch fundamentals (10 lessons)
   interview_questions/   # LLM interview prep (50 questions, 21 categories)
   data/                  # Generated outputs and visualizations
+  docs/                  # TUI PRD and model guide
+  scripts/               # Evaluation and utility scripts
+  cli/                   # CLI entry point (mlr command)
 ```
 
 ## PyTorch Refresher
