@@ -43,7 +43,7 @@ def chat(model: str, messages: list[dict]) -> str:
         resp = client.chat.send(
             model=model,
             messages=messages,
-            max_tokens=2048,
+            max_tokens=4096,
         )
         return resp.choices[0].message.content
     except Exception as e:
