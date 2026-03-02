@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 QUESTIONS_DIR = REPO_ROOT / "interview_questions"
+RUBRICS_PATH = REPO_ROOT / "cli" / "rubrics" / "questions.json"
 
 QUESTION_HEADER_RE = re.compile(r"^## (Q\d+):?\s*(.+)$", re.MULTILINE)
 
@@ -103,7 +105,29 @@ def get_questions(topic: str) -> list[dict] | None:
 
 
 def get_question(q_id: str) -> dict | None:
-    """Find a question by its ID (e.g. 'Q2') across all topics."""
+    """Find a question by its ID.
+
+    Supports bare IDs ('Q2') and compound IDs ('attention_mechanisms_q2').
+    """
+    # Check for compound ID: topic_qN
+    compound_match = re.match(r"^(.+?)_([qQ]\d+)$", q_id)
+    if compound_match:
+        topic_slug = compound_match.group(1)
+        bare_id = compound_match.group(2).upper()
+        d = _find_topic_dir(topic_slug)
+        if d:
+            readme = d / "README.md"
+            if readme.exists():
+                questions = _parse_questions_readme(readme)
+                for q in questions:
+                    if q["id"].upper() == bare_id:
+                        parts = d.name.split("_", 1)
+                        q["topic"] = parts[1] if len(parts) > 1 else d.name
+                        q["topic_dir"] = d.name
+                        return q
+        return None
+
+    # Bare ID: search all topics
     q_id_upper = q_id.upper()
     if not q_id_upper.startswith("Q"):
         q_id_upper = f"Q{q_id_upper}"
@@ -118,10 +142,37 @@ def get_question(q_id: str) -> dict | None:
         questions = _parse_questions_readme(readme)
         for q in questions:
             if q["id"].upper() == q_id_upper:
-                # Add topic context
                 parts = d.name.split("_", 1)
                 q["topic"] = parts[1] if len(parts) > 1 else d.name
                 q["topic_dir"] = d.name
                 return q
 
     return None
+
+
+def _load_rubrics() -> dict[str, dict]:
+    """Load rubrics from questions.json, keyed by compound question ID."""
+    if not RUBRICS_PATH.exists():
+        return {}
+    data = json.loads(RUBRICS_PATH.read_text())
+    return {r["question_id"]: r for r in data}
+
+
+def get_question_with_rubric(q_id: str) -> dict | None:
+    """Get a question merged with its rubric data."""
+    question = get_question(q_id)
+    if not question:
+        return None
+
+    rubrics = _load_rubrics()
+    compound_id = f"{question['topic']}_{question['id'].lower()}"
+    rubric = rubrics.get(compound_id)
+
+    if rubric:
+        question["difficulty"] = rubric.get("difficulty", "intermediate")
+        question["rubric"] = rubric.get("rubric", {})
+    else:
+        question["difficulty"] = "intermediate"
+        question["rubric"] = {}
+
+    return question

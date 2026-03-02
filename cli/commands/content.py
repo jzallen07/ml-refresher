@@ -126,3 +126,49 @@ def question(q_id: str, as_json: bool):
     click.echo("=" * 60)
     click.echo()
     click.echo(result["body"])
+
+
+@content.command()
+@click.argument("query")
+@click.option("--topic", help="Filter by topic slug.")
+@click.option("--source", "source_type", help="Filter by source type (interview_questions, pytorch_lesson, python_file).")
+@click.option("--code-only", is_flag=True, help="Only return chunks containing code.")
+@click.option("--limit", default=5, help="Number of results to return.")
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON.")
+def search(query: str, topic: str | None, source_type: str | None, code_only: bool, limit: int, as_json: bool):
+    """Search content using semantic + keyword search."""
+    from cli.services.retriever import search as do_search
+
+    results = do_search(
+        query=query,
+        topic=topic,
+        source_type=source_type,
+        has_code=True if code_only else None,
+        limit=limit,
+    )
+
+    if not results:
+        raise click.ClickException("No results found. Is the index built? Run 'mlr index build'.")
+
+    if as_json:
+        click.echo(json.dumps(results, indent=2))
+        return
+
+    click.echo(f"Search: {query}")
+    click.echo(f"Results: {len(results)}")
+    click.echo("=" * 60)
+
+    for r in results:
+        click.echo()
+        click.echo(f"  #{r['rank']} [score: {r['relevance_score']:.4f}]")
+        click.echo(f"  Source: {r['source_file']}")
+        if r["topic"]:
+            click.echo(f"  Topic: {r['topic']}")
+        click.echo(f"  Section: {r['metadata']['section']}")
+        click.echo()
+        # Show preview (first 200 chars)
+        preview = r["text"][:200].replace("\n", "\n    ")
+        click.echo(f"    {preview}")
+        if len(r["text"]) > 200:
+            click.echo("    ...")
+        click.echo()

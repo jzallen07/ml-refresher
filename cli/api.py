@@ -5,6 +5,7 @@ from cli.services.questions import (
     list_topics,
     get_questions,
     get_question,
+    get_question_with_rubric,
 )
 from cli.services.executor import run_code
 from cli.services.diagrams import (
@@ -58,6 +59,40 @@ class MLRefresherAPI:
 
     def list_diagrams(self) -> list[dict]:
         return list_diagrams()
+
+    def get_question_with_rubric(self, q_id: str) -> dict | None:
+        return get_question_with_rubric(q_id)
+
+    # -- Search --
+
+    def search_content(
+        self,
+        query: str,
+        topic: str | None = None,
+        source_type: str | None = None,
+        has_code: bool | None = None,
+        limit: int = 5,
+    ) -> list[dict]:
+        from cli.services.retriever import search
+        return search(
+            query=query,
+            topic=topic,
+            source_type=source_type,
+            has_code=has_code,
+            limit=limit,
+        )
+
+    # -- Index --
+
+    def build_index(self, force: bool = False) -> dict:
+        from cli.services.indexer import build_index
+        return build_index(force=force)
+
+    def get_index_status(self) -> dict:
+        from cli.services.indexer import get_index_status
+        return get_index_status()
+
+    # -- Diagrams --
 
     def render_diagram(
         self,

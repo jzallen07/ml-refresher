@@ -3,6 +3,7 @@ import click
 from cli.commands.content import content
 from cli.commands.code import code
 from cli.commands.diagram import diagram
+from cli.commands.index import index
 
 
 @click.group()
@@ -14,3 +15,4 @@ def mlr():
 mlr.add_command(content)
 mlr.add_command(code)
 mlr.add_command(diagram)
+mlr.add_command(index)
