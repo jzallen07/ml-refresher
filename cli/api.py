@@ -100,3 +100,23 @@ class MLRefresherAPI:
         annotations: dict[str, str] | None = None,
     ) -> dict | None:
         return render_diagram(diagram_type, annotations)
+
+    # -- Progress --
+
+    def get_progress(self, topic: str | None = None) -> dict:
+        from cli.state.progress import get_progress
+        return get_progress(topic)
+
+    def update_progress(
+        self,
+        topic: str,
+        event_type: str,
+        score: float | None = None,
+        concepts_tested: list[str] | None = None,
+    ) -> dict:
+        from cli.state.progress import update_progress
+        return update_progress(topic, event_type, score, concepts_tested)
+
+    def get_review_schedule(self) -> dict:
+        from cli.state.progress import get_review_schedule
+        return get_review_schedule()

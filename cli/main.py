@@ -4,6 +4,7 @@ from cli.commands.content import content
 from cli.commands.code import code
 from cli.commands.diagram import diagram
 from cli.commands.index import index
+from cli.commands.progress import progress
 
 
 @click.group()
@@ -16,3 +17,4 @@ mlr.add_command(content)
 mlr.add_command(code)
 mlr.add_command(diagram)
 mlr.add_command(index)
+mlr.add_command(progress)
