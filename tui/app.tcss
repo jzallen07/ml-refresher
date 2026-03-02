@@ -1,0 +1,49 @@
+#main-container {
+    height: 1fr;
+}
+
+#sidebar {
+    width: 24;
+    background: $surface;
+    border-right: solid $primary-background;
+    padding: 1 2;
+}
+
+#chat-scroll {
+    width: 1fr;
+}
+
+.user-message {
+    background: $primary 15%;
+    border: solid $primary-background;
+    padding: 1 2;
+    margin: 1 2;
+}
+
+.agent-message {
+    margin: 1 2;
+}
+
+.tool-indicator {
+    color: $text-muted;
+    text-style: italic;
+    margin: 0 2;
+}
+
+.phase-current {
+    text-style: bold;
+}
+
+.phase-done {
+    color: $text-muted;
+}
+
+.error-message {
+    color: $error;
+    padding: 1 2;
+    margin: 1 2;
+}
+
+Input {
+    dock: bottom;
+}

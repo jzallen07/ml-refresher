@@ -18,3 +18,23 @@ mlr.add_command(code)
 mlr.add_command(diagram)
 mlr.add_command(index)
 mlr.add_command(progress)
+
+
+@mlr.command()
+@click.argument("topic")
+@click.option("--model", default=None, help="Model to use.")
+def learn(topic, model):
+    """Start an interactive learning session."""
+    from tui.app import MLRefresherApp
+
+    MLRefresherApp(mode="teacher", topic=topic, model=model).run()
+
+
+@mlr.command()
+@click.argument("topic")
+@click.option("--model", default=None, help="Model to use.")
+def interview(topic, model):
+    """Start an interactive interview session."""
+    from tui.app import MLRefresherApp
+
+    MLRefresherApp(mode="interviewer", topic=topic, model=model).run()
