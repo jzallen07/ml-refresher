@@ -64,6 +64,48 @@ class MLRefresherAPI:
     def get_question_with_rubric(self, q_id: str) -> dict | None:
         return get_question_with_rubric(q_id)
 
+    # -- Concept Graph --
+
+    def get_graph_summary(self) -> dict:
+        from cli.graph import get_concept_graph
+        cg = get_concept_graph()
+        if cg.is_empty():
+            return {"status": "empty", "message": "No concept graph loaded."}
+        return {**cg.summary(), "status": "loaded"}
+
+    def get_concept_neighbors(self, node_id: str, hops: int = 1) -> dict:
+        from cli.graph import get_concept_graph
+        cg = get_concept_graph()
+        if cg.is_empty():
+            return {"error": "Concept graph not loaded."}
+        node = cg.get_node(node_id)
+        if node is None:
+            return {"error": f"Node '{node_id}' not found in graph."}
+        neighbors = cg.get_neighbors(node_id, hops=hops)
+        prerequisites = cg.get_prerequisites(node_id)
+        dependents = cg.get_dependents(node_id)
+        return {
+            "node": node,
+            "prerequisites": prerequisites,
+            "dependents": dependents,
+            "neighbors": neighbors,
+        }
+
+    def get_learning_path(self, topic: str | None = None, concept: str | None = None) -> dict:
+        from cli.graph import get_concept_graph
+        cg = get_concept_graph()
+        if cg.is_empty():
+            return {"error": "Concept graph not loaded."}
+        path = cg.generate_learning_path(target_topic=topic, target_concept=concept)
+        if not path:
+            target = topic or concept
+            return {"error": f"No learning path found for '{target}'."}
+        return {
+            "target": topic or concept,
+            "path": path,
+            "total_steps": len(path),
+        }
+
     # -- Search --
 
     def search_content(
@@ -73,6 +115,7 @@ class MLRefresherAPI:
         source_type: str | None = None,
         has_code: bool | None = None,
         limit: int = 5,
+        include_graph_context: bool = False,
     ) -> list[dict]:
         from cli.services.retriever import search
         return search(
@@ -81,6 +124,7 @@ class MLRefresherAPI:
             source_type=source_type,
             has_code=has_code,
             limit=limit,
+            include_graph_context=include_graph_context,
         )
 
     # -- Index --
@@ -168,6 +212,15 @@ class MLRefresherAPI:
             if card_data.get("stability") is not None and card_data["stability"] < 2.0:
                 weak_concepts.add(card["concept"])
 
+        # Load concept graph for prerequisite awareness
+        try:
+            from cli.graph import get_concept_graph
+            cg = get_concept_graph()
+            graph_available = not cg.is_empty()
+        except Exception:
+            cg = None
+            graph_available = False
+
         # Score each candidate
         scored = []
         for q in candidates:
@@ -176,18 +229,38 @@ class MLRefresherAPI:
             overdue = sum(1 for c in concepts if c in due_concepts)
             weak = sum(1 for c in concepts if c in weak_concepts)
             unseen = sum(1 for c in concepts if c not in seen_concepts)
-            scored.append((overdue, weak, unseen, q))
 
-        scored.sort(key=lambda x: (x[0], x[1], x[2]), reverse=True)
+            # Prerequisite penalty: deprioritize questions whose prereqs are weak
+            prereq_penalty = 0.0
+            weak_prereqs = []
+            if graph_available:
+                q_node = f"question:{topic}_{q['id'].lower()}"
+                for prereq in cg.get_prerequisites(q_node):
+                    prereq_topic = prereq.get("topic", "")
+                    if prereq_topic:
+                        db2 = StateDB()
+                        try:
+                            mastery = db2.get_topic_mastery(prereq_topic)
+                        finally:
+                            db2.close()
+                        if mastery["avg_stability"] < 2.0 and mastery["card_count"] > 0:
+                            prereq_penalty += 0.5
+                            weak_prereqs.append(prereq_topic)
+
+            scored.append((overdue, weak, unseen, prereq_penalty, weak_prereqs, q))
+
+        # Sort: higher overdue/weak/unseen is better, lower prereq_penalty is better
+        scored.sort(key=lambda x: (x[0], x[1], x[2], -x[3]), reverse=True)
         top = scored[0]
 
         # Random fallback if top score is all zeros
         if top[0] == 0 and top[1] == 0 and top[2] == 0:
-            _, _, _, selected = random.choice(scored)
+            _, _, _, _, _, selected = random.choice(scored)
             reason = "random"
             detail = "No overdue, weak, or unseen concepts found"
+            weak_prereqs = []
         else:
-            _, _, _, selected = top
+            _, _, _, _, weak_prereqs, selected = top
             parts = []
             if top[0]:
                 parts.append(f"{top[0]} overdue")
@@ -205,4 +278,13 @@ class MLRefresherAPI:
 
         result["selection_reason"] = reason
         result["selection_detail"] = detail
+
+        if weak_prereqs:
+            result["weak_prerequisites"] = weak_prereqs
+            result["prerequisite_suggestion"] = (
+                f"Consider reviewing {', '.join(weak_prereqs)} first — "
+                f"{'these topics are' if len(weak_prereqs) > 1 else 'this topic is'} "
+                f"a prerequisite and could use more practice."
+            )
+
         return result

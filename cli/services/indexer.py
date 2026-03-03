@@ -171,11 +171,22 @@ def build_index(force: bool = False) -> dict:
     RUBRICS_PATH.parent.mkdir(parents=True, exist_ok=True)
     RUBRICS_PATH.write_text(json.dumps(rubrics, indent=2))
 
+    # 6. Load and validate concept graph (informational)
+    graph_stats = None
+    try:
+        from cli.graph import ConceptGraph, GRAPH_PATH
+        if GRAPH_PATH.exists():
+            cg = ConceptGraph.load(GRAPH_PATH)
+            if not cg.is_empty():
+                graph_stats = cg.summary()
+    except Exception:
+        pass
+
     total_time = time.time() - start
     parents = sum(1 for c in chunks if c.level == "parent")
     children = sum(1 for c in chunks if c.level == "child")
 
-    return {
+    result = {
         "status": "built",
         "total_chunks": len(chunks),
         "parents": parents,
@@ -188,6 +199,9 @@ def build_index(force: bool = False) -> dict:
             "total_s": round(total_time, 2),
         },
     }
+    if graph_stats:
+        result["concept_graph"] = graph_stats
+    return result
 
 
 def get_index_status() -> dict:

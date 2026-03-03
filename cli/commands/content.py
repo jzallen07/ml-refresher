@@ -155,6 +155,115 @@ def next_question(topic: str, difficulty: str | None, exclude: tuple[str, ...], 
 
 
 @content.command()
+@click.option("--node", "node_id", help="Show neighbors of a specific node.")
+@click.option("--topic", "topic_slug", help="Show concepts for a topic.")
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON.")
+def graph(node_id: str | None, topic_slug: str | None, as_json: bool):
+    """Browse the concept relationship graph."""
+    from cli.api import MLRefresherAPI
+
+    api = MLRefresherAPI()
+
+    if node_id:
+        result = api.get_concept_neighbors(node_id)
+        if "error" in result:
+            raise click.ClickException(result["error"])
+        if as_json:
+            click.echo(json.dumps(result, indent=2))
+            return
+        node = result["node"]
+        click.echo(f"Node: {node.get('label', node_id)} ({node.get('type', '?')})")
+        click.echo("=" * 60)
+        if result["prerequisites"]:
+            click.echo("\nPrerequisites:")
+            for p in result["prerequisites"]:
+                click.echo(f"  <- {p.get('label', p['id'])} [{p.get('edge_type', '?')}]")
+        if result["dependents"]:
+            click.echo("\nDependents:")
+            for d in result["dependents"]:
+                click.echo(f"  -> {d.get('label', d['id'])} [{d.get('edge_type', '?')}]")
+        for edge_type, nodes in result["neighbors"].items():
+            if edge_type in ("PREREQUISITE", "BUILDS_ON"):
+                continue  # Already shown above
+            click.echo(f"\n{edge_type}:")
+            for n in nodes:
+                direction = n.get("direction", "?")
+                arrow = "<-" if direction == "incoming" else "->"
+                click.echo(f"  {arrow} {n.get('label', n['id'])}")
+    elif topic_slug:
+        from cli.graph import get_concept_graph
+        cg = get_concept_graph()
+        concepts = cg.get_concepts_for_topic(topic_slug)
+        if as_json:
+            click.echo(json.dumps(concepts, indent=2))
+            return
+        click.echo(f"Concepts for: {topic_slug}")
+        click.echo("=" * 40)
+        for c in concepts:
+            click.echo(f"  - {c.get('label', c['id'])}")
+        if not concepts:
+            click.echo("  (none)")
+    else:
+        result = api.get_graph_summary()
+        if as_json:
+            click.echo(json.dumps(result, indent=2))
+            return
+        if result.get("status") == "empty":
+            click.echo("Concept graph not loaded.")
+            return
+        click.echo("Concept Graph Summary")
+        click.echo("=" * 40)
+        click.echo(f"Total nodes: {result['total_nodes']}")
+        for ntype, count in sorted(result["nodes_by_type"].items()):
+            click.echo(f"  {ntype}: {count}")
+        click.echo(f"Total edges: {result['total_edges']}")
+        for etype, count in sorted(result["edges_by_type"].items()):
+            click.echo(f"  {etype}: {count}")
+
+
+@content.command()
+@click.option("--topic", "topic_slug", help="Learning path for a topic.")
+@click.option("--concept", "concept_slug", help="Learning path for a concept.")
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON.")
+def path(topic_slug: str | None, concept_slug: str | None, as_json: bool):
+    """Show an ordered learning path with prerequisites first."""
+    from cli.api import MLRefresherAPI
+
+    if not topic_slug and not concept_slug:
+        raise click.ClickException("Specify --topic or --concept.")
+
+    api = MLRefresherAPI()
+    result = api.get_learning_path(topic=topic_slug, concept=concept_slug)
+
+    if "error" in result:
+        raise click.ClickException(result["error"])
+
+    if as_json:
+        click.echo(json.dumps(result, indent=2))
+        return
+
+    target = result["target"]
+    path_items = result["path"]
+    click.echo(f"Learning Path: {target}")
+    click.echo(f"Steps: {result['total_steps']}")
+    click.echo("=" * 60)
+    for item in path_items:
+        markers = {
+            "foundation": "F",
+            "target": "*",
+            "intermediate": " ",
+        }
+        marker = markers.get(item["classification"], " ")
+        prereqs = ""
+        if item["prerequisites"]:
+            prereqs = f"  (requires: {', '.join(item['prerequisites'])})"
+        click.echo(f"  [{marker}] {item['order']}. {item['label']}{prereqs}")
+
+    click.echo()
+    click.echo("Legend: [F] = foundation (no prerequisites), [*] = target")
+
+
+@content.command()
 @click.argument("query")
 @click.option("--topic", help="Filter by topic slug.")
 @click.option("--source", "source_type", help="Filter by source type (interview_questions, pytorch_lesson, python_file).")

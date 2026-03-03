@@ -15,6 +15,7 @@ def make_content_tools(api: MLRefresherAPI) -> list[Tool]:
             source_type=input.get("source_type"),
             has_code=input.get("has_code"),
             limit=input.get("limit", 5),
+            include_graph_context=input.get("include_graph_context", False),
         )
         return {"results": results}
 
@@ -30,6 +31,14 @@ def make_content_tools(api: MLRefresherAPI) -> list[Tool]:
         )
         if result is None:
             return {"error": f"Question '{input['question_id']}' not found"}
+        return result
+
+    async def get_learning_path(input: dict) -> dict:
+        result = await asyncio.to_thread(
+            api.get_learning_path,
+            topic=input.get("topic"),
+            concept=input.get("concept"),
+        )
         return result
 
     return [
@@ -48,6 +57,10 @@ def make_content_tools(api: MLRefresherAPI) -> list[Tool]:
                     },
                     "has_code": {"type": "boolean", "description": "Only return results with code"},
                     "limit": {"type": "integer", "description": "Max results (default 5)"},
+                    "include_graph_context": {
+                        "type": "boolean",
+                        "description": "Include concept graph context (prerequisites, related concepts) in results",
+                    },
                 },
                 "required": ["query"],
             },
@@ -76,5 +89,17 @@ def make_content_tools(api: MLRefresherAPI) -> list[Tool]:
                 "required": ["question_id"],
             },
             execute=get_question,
+        ),
+        Tool(
+            name="get_learning_path",
+            description="Get an ordered learning path for a topic or concept, showing prerequisites first.",
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "topic": {"type": "string", "description": "Topic slug (e.g. 'transformer_architecture')"},
+                    "concept": {"type": "string", "description": "Concept slug (e.g. 'multi_head_attention')"},
+                },
+            },
+            execute=get_learning_path,
         ),
     ]

@@ -145,6 +145,39 @@ class StateDB:
         ).fetchall()
         return [dict(r) for r in rows]
 
+    def get_topic_mastery(self, topic_id: str) -> dict:
+        """Aggregate mastery for a topic: avg stability, % mastered, weakest concepts."""
+        cards = self.get_all_cards(topic_id)
+        if not cards:
+            return {"topic_id": topic_id, "card_count": 0, "avg_stability": 0.0, "pct_mastered": 0.0, "weakest": []}
+
+        stabilities = []
+        mastered = 0
+        weakest = []
+        for card in cards:
+            card_data = json.loads(card["card_json"])
+            stability = card_data.get("stability")
+            if stability is not None:
+                stabilities.append(stability)
+                if stability >= 2.0:
+                    mastered += 1
+                else:
+                    weakest.append({"concept": card["concept"], "stability": stability})
+            else:
+                weakest.append({"concept": card["concept"], "stability": 0.0})
+
+        avg_stability = sum(stabilities) / len(stabilities) if stabilities else 0.0
+        pct_mastered = mastered / len(cards) if cards else 0.0
+        weakest.sort(key=lambda x: x["stability"])
+
+        return {
+            "topic_id": topic_id,
+            "card_count": len(cards),
+            "avg_stability": round(avg_stability, 2),
+            "pct_mastered": round(pct_mastered, 2),
+            "weakest": weakest[:3],
+        }
+
     def get_card(self, topic_id: str, concept: str) -> dict | None:
         row = self.conn.execute(
             "SELECT * FROM fsrs_cards WHERE topic_id = ? AND concept = ?",

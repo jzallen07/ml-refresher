@@ -27,14 +27,38 @@ def _get_table():
     return db.open_table(TABLE_NAME)
 
 
+def _enrich_with_graph(result: dict, cg) -> None:
+    """Add graph context to a search result."""
+    category = result.get("topic", "")
+    question_id = result.get("metadata", {}).get("question_id", "")
+    if not category or not question_id:
+        return
+
+    q_node_id = f"question:{category}_{question_id.lower()}"
+    node = cg.get_node(q_node_id)
+    if node is None:
+        return
+
+    prereqs = cg.get_prerequisites(q_node_id)
+    deps = cg.get_dependents(q_node_id)
+    concepts = cg.get_concepts_for_topic(category)
+
+    result["graph_context"] = {
+        "related_concepts": [c.get("label", c["id"]) for c in concepts],
+        "prerequisite_concepts": [p.get("label", p["id"]) for p in prereqs],
+        "dependent_topics": [d.get("label", d["id"]) for d in deps],
+    }
+
+
 def search(
     query: str,
     topic: str | None = None,
     source_type: str | None = None,
     has_code: bool | None = None,
     limit: int = 5,
+    include_graph_context: bool = False,
 ) -> list[dict]:
-    """4-stage search pipeline: hybrid retrieval, filtering, re-ranking, parent expansion."""
+    """5-stage search pipeline: hybrid retrieval, filtering, re-ranking, parent expansion, graph enrichment."""
     table = _get_table()
 
     # Stage 1: Hybrid retrieval (BM25 + dense + RRF)
@@ -121,5 +145,16 @@ def search(
             },
         }
         results.append(result)
+
+    # Stage 5: Graph enrichment
+    if include_graph_context:
+        try:
+            from cli.graph import get_concept_graph
+            cg = get_concept_graph()
+            if not cg.is_empty():
+                for result in results:
+                    _enrich_with_graph(result, cg)
+        except Exception:
+            pass
 
     return results

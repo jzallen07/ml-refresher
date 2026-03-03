@@ -35,7 +35,7 @@ TEACHER_PHASES: dict[str, PhaseConfig] = {
     ),
     "introduce": PhaseConfig(
         system_prompt_template=INTRODUCE_PROMPT,
-        available_tools=["search_content", "get_lesson", "render_diagram"],
+        available_tools=["search_content", "get_lesson", "render_diagram", "get_learning_path"],
         forced_tool="search_content",
         max_turns=3,
         transition_condition="auto",
@@ -47,6 +47,7 @@ TEACHER_PHASES: dict[str, PhaseConfig] = {
             "run_python",
             "get_code_example",
             "render_diagram",
+            "get_learning_path",
         ],
         forced_tool=None,
         max_turns=15,
@@ -104,7 +105,7 @@ INTERVIEWER_PHASES: dict[str, PhaseConfig] = {
     ),
     "debrief": PhaseConfig(
         system_prompt_template=DEBRIEF_PROMPT,
-        available_tools=["update_progress", "get_progress"],
+        available_tools=["update_progress", "get_progress", "get_learning_path"],
         forced_tool="update_progress",
         max_turns=3,
         transition_condition="auto",

@@ -25,6 +25,7 @@ dependencies = [
     "einops>=0.7.0",
 "fsrs>=4.0.0",
     "textual>=1.0.0",
+    "networkx>=3.0",
 ]
 
 [build-system]
