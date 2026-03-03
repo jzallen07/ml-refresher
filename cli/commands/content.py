@@ -128,6 +128,32 @@ def question(q_id: str, as_json: bool):
     click.echo(result["body"])
 
 
+@content.command("next-question")
+@click.argument("topic")
+@click.option("--difficulty", type=click.Choice(["basic", "intermediate", "advanced"]), help="Filter by difficulty.")
+@click.option("--exclude", multiple=True, help="Question IDs to exclude (e.g. --exclude Q1 --exclude Q3).")
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON.")
+def next_question(topic: str, difficulty: str | None, exclude: tuple[str, ...], as_json: bool):
+    """Pick the best next question for a topic using FSRS-aware selection."""
+    from cli.api import MLRefresherAPI
+
+    api = MLRefresherAPI()
+    result = api.next_question(topic, difficulty=difficulty, exclude_ids=list(exclude) if exclude else None)
+
+    if "error" in result:
+        raise click.ClickException(result["error"])
+
+    if as_json:
+        click.echo(json.dumps(result, indent=2))
+        return
+
+    click.echo(f"Question: {result.get('id', '?')}: {result.get('title', '?')}")
+    click.echo(f"Selection: {result.get('selection_reason', '?')}")
+    click.echo(f"Detail: {result.get('selection_detail', '?')}")
+    if result.get("difficulty"):
+        click.echo(f"Difficulty: {result['difficulty']}")
+
+
 @content.command()
 @click.argument("query")
 @click.option("--topic", help="Filter by topic slug.")

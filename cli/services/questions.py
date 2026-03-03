@@ -158,6 +158,18 @@ def _load_rubrics() -> dict[str, dict]:
     return {r["question_id"]: r for r in data}
 
 
+def get_rubrics_for_topic(category: str) -> dict[str, dict]:
+    """Load rubrics filtered by category/topic, keyed by bare question ID (e.g. 'Q2')."""
+    if not RUBRICS_PATH.exists():
+        return {}
+    data = json.loads(RUBRICS_PATH.read_text())
+    return {
+        r["bare_id"]: r
+        for r in data
+        if r.get("category") == category
+    }
+
+
 def get_question_with_rubric(q_id: str) -> dict | None:
     """Get a question merged with its rubric data."""
     question = get_question(q_id)

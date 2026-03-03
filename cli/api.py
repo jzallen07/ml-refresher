@@ -6,6 +6,7 @@ from cli.services.questions import (
     get_questions,
     get_question,
     get_question_with_rubric,
+    get_rubrics_for_topic,
 )
 from cli.services.executor import run_code
 from cli.services.diagrams import (
@@ -120,3 +121,88 @@ class MLRefresherAPI:
     def get_review_schedule(self) -> dict:
         from cli.state.progress import get_review_schedule
         return get_review_schedule()
+
+    def next_question(
+        self,
+        topic: str,
+        difficulty: str | None = None,
+        exclude_ids: list[str] | None = None,
+    ) -> dict:
+        import json
+        import random
+        from cli.state.db import StateDB
+
+        questions = get_questions(topic)
+        if questions is None:
+            return {"error": f"No questions found for topic '{topic}'"}
+
+        exclude = set(exclude_ids or [])
+        candidates = [q for q in questions if q["id"] not in exclude]
+        if not candidates:
+            return {"error": "No matching questions available", "all_exhausted": True}
+
+        # Soft difficulty filter via rubrics
+        rubrics = get_rubrics_for_topic(topic)
+        if difficulty:
+            filtered = [
+                q for q in candidates
+                if rubrics.get(q["id"], {}).get("difficulty") == difficulty
+            ]
+            if filtered:
+                candidates = filtered
+
+        # Load FSRS state
+        db = StateDB()
+        try:
+            due_cards = db.get_due_cards(topic_id=topic)
+            all_cards = db.get_all_cards(topic)
+        finally:
+            db.close()
+
+        due_concepts = {c["concept"] for c in due_cards}
+        weak_concepts = set()
+        seen_concepts = set()
+        for card in all_cards:
+            seen_concepts.add(card["concept"])
+            card_data = json.loads(card["card_json"])
+            if card_data.get("stability") is not None and card_data["stability"] < 2.0:
+                weak_concepts.add(card["concept"])
+
+        # Score each candidate
+        scored = []
+        for q in candidates:
+            rubric = rubrics.get(q["id"], {})
+            concepts = rubric.get("rubric", {}).get("key_concepts", [])
+            overdue = sum(1 for c in concepts if c in due_concepts)
+            weak = sum(1 for c in concepts if c in weak_concepts)
+            unseen = sum(1 for c in concepts if c not in seen_concepts)
+            scored.append((overdue, weak, unseen, q))
+
+        scored.sort(key=lambda x: (x[0], x[1], x[2]), reverse=True)
+        top = scored[0]
+
+        # Random fallback if top score is all zeros
+        if top[0] == 0 and top[1] == 0 and top[2] == 0:
+            _, _, _, selected = random.choice(scored)
+            reason = "random"
+            detail = "No overdue, weak, or unseen concepts found"
+        else:
+            _, _, _, selected = top
+            parts = []
+            if top[0]:
+                parts.append(f"{top[0]} overdue")
+            if top[1]:
+                parts.append(f"{top[1]} weak")
+            if top[2]:
+                parts.append(f"{top[2]} unseen")
+            reason = "adaptive"
+            detail = f"Concept match: {', '.join(parts)}"
+
+        compound_id = f"{topic}_{selected['id'].lower()}"
+        result = get_question_with_rubric(compound_id)
+        if not result:
+            result = selected
+
+        result["selection_reason"] = reason
+        result["selection_detail"] = detail
+        return result

@@ -15,7 +15,7 @@ from tui.bridge import ToolStarted, ToolFinished, make_callbacks, create_session
 
 class MLRefresherApp(App):
     CSS_PATH = "app.tcss"
-    BINDINGS = [("ctrl+q", "quit", "Quit")]
+    BINDINGS = [("ctrl+q", "quit", "Quit"), ("ctrl+p", "show_dashboard", "Progress")]
 
     def __init__(
         self,
@@ -199,6 +199,10 @@ class MLRefresherApp(App):
             completed_phases=self._completed_phases,
             progress_data=progress_data,
         )
+
+    def action_show_dashboard(self) -> None:
+        from tui.screens import ProgressDashboard
+        self.push_screen(ProgressDashboard())
 
     def _show_error(self, text: str) -> None:
         chat = self.query_one("#chat-scroll", VerticalScroll)

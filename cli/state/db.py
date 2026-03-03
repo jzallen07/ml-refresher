@@ -138,6 +138,13 @@ class StateDB:
             ).fetchall()
         return [dict(r) for r in rows]
 
+    def get_all_cards(self, topic_id: str) -> list[dict]:
+        rows = self.conn.execute(
+            "SELECT * FROM fsrs_cards WHERE topic_id = ? ORDER BY due_date ASC",
+            (topic_id,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
     def get_card(self, topic_id: str, concept: str) -> dict | None:
         row = self.conn.execute(
             "SELECT * FROM fsrs_cards WHERE topic_id = ? AND concept = ?",

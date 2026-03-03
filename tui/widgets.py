@@ -55,6 +55,9 @@ class Sidebar(Static):
         lines.append(f"  Score: {score}")
         lines.append(f"  Due:   {due}")
 
+        lines.append("")
+        lines.append("[dim]ctrl+p Dashboard[/dim]")
+
         self.update("\n".join(lines))
 
 

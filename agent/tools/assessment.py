@@ -14,28 +14,11 @@ def make_assessment_tools(
 ) -> list[Tool]:
 
     async def get_interview_question(input: dict) -> dict:
-        topic = input["topic"]
-        difficulty = input.get("difficulty")
-        exclude_ids = input.get("exclude_ids", [])
-
-        questions = api.get_questions(topic)
-        if questions is None:
-            return {"error": f"No questions found for topic '{topic}'"}
-
-        candidates = [q for q in questions if q["id"] not in exclude_ids]
-        if difficulty:
-            difficulty_filtered = [
-                q for q in candidates if q.get("difficulty") == difficulty
-            ]
-            if difficulty_filtered:
-                candidates = difficulty_filtered
-
-        if not candidates:
-            return {"error": "No matching questions available", "all_exhausted": True}
-
-        selected = candidates[0]
-        rubric = api.get_question_with_rubric(selected["id"])
-        return rubric if rubric else selected
+        return api.next_question(
+            topic=input["topic"],
+            difficulty=input.get("difficulty"),
+            exclude_ids=input.get("exclude_ids", []),
+        )
 
     async def generate_quiz(input: dict) -> dict:
         topic = input["topic"]
