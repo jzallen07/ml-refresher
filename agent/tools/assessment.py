@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 
-from anthropic import AsyncAnthropic
+from openrouter import OpenRouter
 
 from cli.api import MLRefresherAPI
 from agent.tools import Tool
@@ -10,7 +10,7 @@ from agent.prompts import QUIZ_GENERATION_PROMPT, EVALUATION_PROMPT
 
 
 def make_assessment_tools(
-    api: MLRefresherAPI, client: AsyncAnthropic, model: str
+    api: MLRefresherAPI, client: OpenRouter, model: str
 ) -> list[Tool]:
 
     async def get_interview_question(input: dict) -> dict:
@@ -37,13 +37,13 @@ def make_assessment_tools(
             context=context,
         )
 
-        response = await client.messages.create(
+        response = await client.chat.send_async(
             model=model,
             max_tokens=2048,
             messages=[{"role": "user", "content": prompt}],
         )
 
-        text = response.content[0].text
+        text = response.choices[0].message.content
         # Extract JSON from response
         try:
             start = text.index("[")
@@ -83,13 +83,13 @@ def make_assessment_tools(
             concepts=json.dumps(rubric_concepts),
         )
 
-        response = await client.messages.create(
+        response = await client.chat.send_async(
             model=model,
             max_tokens=1024,
             messages=[{"role": "user", "content": prompt}],
         )
 
-        text = response.content[0].text
+        text = response.choices[0].message.content
         try:
             start = text.index("{")
             end = text.rindex("}") + 1

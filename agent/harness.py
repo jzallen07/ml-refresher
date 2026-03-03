@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import asyncio
+import os
 import sys
 
-from anthropic import AsyncAnthropic
+from openrouter import OpenRouter
 
 from cli.api import MLRefresherAPI
 from agent.tools import ToolRegistry
@@ -16,10 +17,17 @@ from agent.loop import AgentLoop
 from agent.orchestrator import SessionOrchestrator
 
 
-DEFAULT_MODEL = "claude-sonnet-4-20250514"
+DEFAULT_MODEL = "anthropic/claude-sonnet-4.6"
 
 
-def build_registry(api: MLRefresherAPI, client: AsyncAnthropic, model: str) -> ToolRegistry:
+def make_client() -> OpenRouter:
+    api_key = os.environ.get("OPENROUTER_API_KEY")
+    if not api_key:
+        raise RuntimeError("OPENROUTER_API_KEY environment variable is not set.")
+    return OpenRouter(api_key=api_key)
+
+
+def build_registry(api: MLRefresherAPI, client: OpenRouter, model: str) -> ToolRegistry:
     registry = ToolRegistry()
     for tool in make_content_tools(api):
         registry.register(tool)
@@ -48,7 +56,7 @@ def on_tool_end(name: str, result: dict):
 
 
 async def run_session(mode: str, topic: str, model: str = DEFAULT_MODEL):
-    client = AsyncAnthropic()
+    client = make_client()
     api = MLRefresherAPI()
     registry = build_registry(api, client, model)
 

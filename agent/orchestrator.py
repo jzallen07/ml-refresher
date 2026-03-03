@@ -90,13 +90,13 @@ class SessionOrchestrator:
         # Force a specific tool on the first turn of this phase
         tool_choice = None
         if config.forced_tool and self._turn_in_phase == 0:
-            tool_choice = {"type": "tool", "name": config.forced_tool}
+            tool_choice = {"type": "function", "function": {"name": config.forced_tool}}
 
         self._turn_in_phase += 1
         response = await self._agent.step(tool_choice=tool_choice)
 
         # If the model wants to call more tools, keep stepping
-        while response.stop_reason == "tool_use":
+        while response.stop_reason == "tool_calls":
             response = await self._agent.step()
 
         self._update_context(response)
@@ -108,7 +108,7 @@ class SessionOrchestrator:
 
     def _should_transition(self, config: PhaseConfig, response: AgentResponse) -> bool:
         if config.transition_condition == "auto":
-            return response.stop_reason == "end_turn"
+            return response.stop_reason == "stop"
         elif config.transition_condition == "user_ready":
             return self._turn_in_phase >= config.max_turns
         elif config.transition_condition == "quiz_complete":

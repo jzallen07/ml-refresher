@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import os
 
-import anthropic
+from openrouter.errors import UnauthorizedResponseError
 from textual import work
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, VerticalScroll
@@ -45,8 +45,8 @@ class MLRefresherApp(App):
         yield Footer()
 
     def on_mount(self) -> None:
-        if not os.environ.get("ANTHROPIC_API_KEY"):
-            self._show_error("ANTHROPIC_API_KEY environment variable is not set.")
+        if not os.environ.get("OPENROUTER_API_KEY"):
+            self._show_error("OPENROUTER_API_KEY environment variable is not set.")
             self.query_one(Input).disabled = True
             return
 
@@ -96,8 +96,8 @@ class MLRefresherApp(App):
         except asyncio.TimeoutError:
             self._show_error("Session timed out. Please try again.")
             self.query_one(Input).disabled = False
-        except anthropic.AuthenticationError:
-            self._show_error("Authentication failed. Check your ANTHROPIC_API_KEY.")
+        except UnauthorizedResponseError:
+            self._show_error("Authentication failed. Check your OPENROUTER_API_KEY.")
             self.query_one(Input).disabled = True
         except Exception as e:
             self._show_error(f"Error: {e}")
@@ -137,8 +137,8 @@ class MLRefresherApp(App):
             )
         except asyncio.TimeoutError:
             self._show_error("Response timed out. Please try again.")
-        except anthropic.AuthenticationError:
-            self._show_error("Authentication failed. Check your ANTHROPIC_API_KEY.")
+        except UnauthorizedResponseError:
+            self._show_error("Authentication failed. Check your OPENROUTER_API_KEY.")
             self.query_one(Input).disabled = True
             return
         except Exception as e:

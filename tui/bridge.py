@@ -3,12 +3,10 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING, Callable
 
-from anthropic import AsyncAnthropic
-
 from textual.message import Message
 
 from cli.api import MLRefresherAPI
-from agent.harness import build_registry, DEFAULT_MODEL
+from agent.harness import build_registry, make_client, DEFAULT_MODEL
 from agent.loop import AgentLoop
 from agent.orchestrator import SessionOrchestrator
 
@@ -61,7 +59,7 @@ def create_session(
     on_tool_end: Callable[[str, dict], None],
 ) -> tuple[SessionOrchestrator, MLRefresherAPI]:
     resolved_model = model or DEFAULT_MODEL
-    client = AsyncAnthropic()
+    client = make_client()
     api = MLRefresherAPI()
     registry = build_registry(api, client, resolved_model)
 
