@@ -9,7 +9,7 @@ from textual.app import App, ComposeResult
 from textual.containers import Horizontal, VerticalScroll
 from textual.widgets import Header, Footer, Markdown, Static, TextArea
 
-from tui.widgets import Sidebar, ToolIndicator
+from tui.widgets import Sidebar, ToolIndicator, VisualizationWidget
 from tui.bridge import ToolStarted, ToolFinished, make_callbacks, create_session
 
 
@@ -254,7 +254,15 @@ class MLRefresherApp(App):
                 indicator.remove()
                 break
 
-        if "error" in message.result:
+        if message.result.get("type") == "visualization":
+            chat = self.query_one("#chat-scroll", VerticalScroll)
+            widget = VisualizationWidget(
+                image_path=message.result["image_path"],
+                title=message.result.get("title", ""),
+            )
+            chat.mount(widget)
+            chat.anchor()
+        elif "error" in message.result:
             chat = self.query_one("#chat-scroll", VerticalScroll)
             chat.mount(Static(f"⚠ {message.name}: {message.result['error']}", classes="tool-error"))
 

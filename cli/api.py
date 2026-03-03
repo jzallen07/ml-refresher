@@ -61,6 +61,28 @@ class MLRefresherAPI:
     def list_diagrams(self) -> list[dict]:
         return list_diagrams()
 
+    # -- Visualizations --
+
+    def render_heatmap(self, **kwargs) -> str:
+        from cli.services.viz_renderer import render_heatmap
+        return render_heatmap(**kwargs)
+
+    def render_function_plot(self, **kwargs) -> str:
+        from cli.services.viz_renderer import render_function_plot
+        return render_function_plot(**kwargs)
+
+    def render_tensor_shapes(self, **kwargs) -> str:
+        from cli.services.viz_renderer import render_tensor_shapes
+        return render_tensor_shapes(**kwargs)
+
+    def get_visualization(self, topic: str, name: str) -> dict | None:
+        from cli.services.viz_renderer import get_visualization
+        return get_visualization(topic, name)
+
+    def list_visualizations(self, topic: str | None = None) -> list[dict]:
+        from cli.services.viz_renderer import list_visualizations
+        return list_visualizations(topic)
+
     def get_question_with_rubric(self, q_id: str) -> dict | None:
         return get_question_with_rubric(q_id)
 

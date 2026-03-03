@@ -12,6 +12,7 @@ from agent.tools.content import make_content_tools
 from agent.tools.code import make_code_tools
 from agent.tools.state import make_state_tools
 from agent.tools.presentation import make_presentation_tools
+from agent.tools.visualization import make_visualization_tools
 from agent.tools.assessment import make_assessment_tools
 from agent.loop import AgentLoop
 from agent.orchestrator import SessionOrchestrator
@@ -36,6 +37,8 @@ def build_registry(api: MLRefresherAPI, client: OpenRouter, model: str) -> ToolR
     for tool in make_state_tools(api):
         registry.register(tool)
     for tool in make_presentation_tools(api):
+        registry.register(tool)
+    for tool in make_visualization_tools(api):
         registry.register(tool)
     for tool in make_assessment_tools(api, client, model):
         registry.register(tool)

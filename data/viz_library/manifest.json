@@ -1,0 +1,278 @@
+{
+  "version": 1,
+  "visualizations": {
+    "attention_mechanisms": [
+      {
+        "name": "attention_basic_heatmap",
+        "file": "attention_mechanisms/attention_basic_heatmap.png",
+        "title": "Basic Attention Heatmap",
+        "description": "Shows how each token attends to every other token using scaled dot-product attention.",
+        "tags": [
+          "attention",
+          "heatmap",
+          "self-attention"
+        ]
+      },
+      {
+        "name": "attention_all_heads",
+        "file": "attention_mechanisms/attention_all_heads.png",
+        "title": "Multi-Head Attention Patterns",
+        "description": "Each attention head learns to focus on different aspects of the input.",
+        "tags": [
+          "multi-head",
+          "attention",
+          "heads"
+        ]
+      },
+      {
+        "name": "causal_mask",
+        "file": "attention_mechanisms/causal_mask.png",
+        "title": "Causal Attention Mask",
+        "description": "Lower triangular mask ensures each token can only attend to past and current positions.",
+        "tags": [
+          "causal",
+          "mask",
+          "autoregressive"
+        ]
+      },
+      {
+        "name": "attention_patterns",
+        "file": "attention_mechanisms/attention_patterns.png",
+        "title": "Common Attention Patterns",
+        "description": "Four archetypal attention patterns: uniform, local, self-focused, and content-focused.",
+        "tags": [
+          "patterns",
+          "attention",
+          "comparison"
+        ]
+      }
+    ],
+    "loss_functions_and_math": [
+      {
+        "name": "cross_entropy_curve",
+        "file": "loss_functions_and_math/cross_entropy_curve.png",
+        "title": "Cross-Entropy Loss Curve",
+        "description": "Shows how cross-entropy loss increases sharply as predicted probability of the correct class drops.",
+        "tags": [
+          "loss",
+          "cross-entropy",
+          "classification"
+        ]
+      },
+      {
+        "name": "activation_functions",
+        "file": "loss_functions_and_math/activation_functions.png",
+        "title": "Activation Functions Comparison",
+        "description": "ReLU, Sigmoid, Tanh, GELU, and Swish \u2014 the most common activation functions in deep learning.",
+        "tags": [
+          "activation",
+          "relu",
+          "gelu",
+          "sigmoid"
+        ]
+      },
+      {
+        "name": "kl_divergence",
+        "file": "loss_functions_and_math/kl_divergence.png",
+        "title": "KL Divergence",
+        "description": "KL divergence measures how one probability distribution differs from a reference distribution.",
+        "tags": [
+          "kl-divergence",
+          "distribution",
+          "loss"
+        ]
+      },
+      {
+        "name": "loss_landscape",
+        "file": "loss_functions_and_math/loss_landscape.png",
+        "title": "Loss Landscape",
+        "description": "A contour plot of the Rosenbrock function with a gradient descent path, illustrating optimization challenges.",
+        "tags": [
+          "loss-landscape",
+          "optimization",
+          "gradient-descent"
+        ]
+      }
+    ],
+    "gradients_and_optimization": [
+      {
+        "name": "embedding_gradient_sparsity",
+        "file": "gradients_and_optimization/embedding_gradient_sparsity.png",
+        "title": "Embedding Gradient Sparsity",
+        "description": "Only tokens present in the batch receive gradient updates \u2014 most embedding rows stay at zero.",
+        "tags": [
+          "embeddings",
+          "gradients",
+          "sparsity"
+        ]
+      },
+      {
+        "name": "gradient_flow_layers",
+        "file": "gradients_and_optimization/gradient_flow_layers.png",
+        "title": "Gradient Flow Through Layers",
+        "description": "Gradient norms typically decrease in deeper layers, showing the vanishing gradient problem.",
+        "tags": [
+          "gradients",
+          "vanishing",
+          "layers"
+        ]
+      },
+      {
+        "name": "learning_rate_comparison",
+        "file": "gradients_and_optimization/learning_rate_comparison.png",
+        "title": "Learning Rate Comparison",
+        "description": "Too high: loss oscillates. Too low: convergence is slow. A good LR balances speed and stability.",
+        "tags": [
+          "learning-rate",
+          "optimization",
+          "training"
+        ]
+      },
+      {
+        "name": "hyperparameter_sensitivity",
+        "file": "gradients_and_optimization/hyperparameter_sensitivity.png",
+        "title": "Hyperparameter Sensitivity",
+        "description": "Shows how final validation loss changes with learning rate, batch size, weight decay, and dropout.",
+        "tags": [
+          "hyperparameters",
+          "sensitivity",
+          "tuning"
+        ]
+      }
+    ],
+    "embeddings": [
+      {
+        "name": "embedding_space_pca",
+        "file": "embeddings/embedding_space_pca.png",
+        "title": "Embedding Space PCA",
+        "description": "Semantically similar words cluster together in embedding space, visible via PCA projection.",
+        "tags": [
+          "embeddings",
+          "pca",
+          "clusters"
+        ]
+      },
+      {
+        "name": "cosine_similarity_matrix",
+        "file": "embeddings/cosine_similarity_matrix.png",
+        "title": "Cosine Similarity Matrix",
+        "description": "Cosine similarity reveals semantic relationships between word embeddings.",
+        "tags": [
+          "embeddings",
+          "cosine-similarity",
+          "semantic"
+        ]
+      }
+    ],
+    "training_objectives": [
+      {
+        "name": "mlm_vs_autoregressive",
+        "file": "training_objectives/mlm_vs_autoregressive.png",
+        "title": "MLM vs Autoregressive",
+        "description": "BERT masks random tokens and predicts them; GPT predicts each token from left-to-right context.",
+        "tags": [
+          "mlm",
+          "autoregressive",
+          "bert",
+          "gpt"
+        ]
+      }
+    ],
+    "fine_tuning_methods": [
+      {
+        "name": "lora_matrices",
+        "file": "fine_tuning_methods/lora_matrices.png",
+        "title": "LoRA Matrix Decomposition",
+        "description": "LoRA freezes the original weight matrix W and trains low-rank matrices A and B.",
+        "tags": [
+          "lora",
+          "fine-tuning",
+          "low-rank"
+        ]
+      },
+      {
+        "name": "lora_parameter_comparison",
+        "file": "fine_tuning_methods/lora_parameter_comparison.png",
+        "title": "LoRA Parameter Comparison",
+        "description": "LoRA trains only ~0.3% of parameters compared to full fine-tuning, scaling efficiently.",
+        "tags": [
+          "lora",
+          "parameter-efficiency",
+          "comparison"
+        ]
+      }
+    ],
+    "regularization": [
+      {
+        "name": "dropout_behavior",
+        "file": "regularization/dropout_behavior.png",
+        "title": "Dropout Behavior",
+        "description": "Dropout randomly zeros out neurons during training. Higher rates = more neurons dropped.",
+        "tags": [
+          "dropout",
+          "regularization",
+          "mask"
+        ]
+      },
+      {
+        "name": "dropout_training_comparison",
+        "file": "regularization/dropout_training_comparison.png",
+        "title": "Dropout Training Comparison",
+        "description": "Without dropout (p=0) the model overfits; moderate dropout (p=0.2) gives best validation loss.",
+        "tags": [
+          "dropout",
+          "overfitting",
+          "training"
+        ]
+      }
+    ],
+    "dimensionality_reduction": [
+      {
+        "name": "pca_explained_variance",
+        "file": "dimensionality_reduction/pca_explained_variance.png",
+        "title": "PCA Explained Variance",
+        "description": "Scree plot and cumulative variance show how many principal components capture most of the data variance.",
+        "tags": [
+          "pca",
+          "explained-variance",
+          "scree-plot"
+        ]
+      },
+      {
+        "name": "pca_projection",
+        "file": "dimensionality_reduction/pca_projection.png",
+        "title": "PCA Projection",
+        "description": "Left: original data with principal component directions. Right: data projected onto PC axes.",
+        "tags": [
+          "pca",
+          "projection",
+          "dimensionality-reduction"
+        ]
+      }
+    ],
+    "transformer_deep_dive": [
+      {
+        "name": "positional_encoding",
+        "file": "transformer_deep_dive/positional_encoding.png",
+        "title": "Positional Encoding",
+        "description": "Sinusoidal positional encodings give each position a unique pattern using sin/cos at different frequencies.",
+        "tags": [
+          "positional-encoding",
+          "transformer",
+          "sinusoidal"
+        ]
+      },
+      {
+        "name": "transformer_shapes",
+        "file": "transformer_deep_dive/transformer_shapes.png",
+        "title": "Transformer Tensor Shapes",
+        "description": "Shows how tensor dimensions change as data flows through a transformer layer.",
+        "tags": [
+          "transformer",
+          "shapes",
+          "dimensions"
+        ]
+      }
+    ]
+  }
+}

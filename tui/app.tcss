@@ -50,6 +50,13 @@
     margin: 0 2;
 }
 
+VisualizationWidget {
+    margin: 1 2;
+    height: auto;
+    background: $surface;
+    border: round $secondary;
+}
+
 #user-input {
     dock: bottom;
     height: 3;

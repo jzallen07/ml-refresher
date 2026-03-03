@@ -25,6 +25,8 @@ Instructions:
 - Use search_content to find the most relevant learning material on this topic.
 - Present key concepts in a structured way, building from simple to complex.
 - Use get_lesson or render_diagram when visual aids would help understanding.
+- Use show_visualization, render_heatmap, render_function_plot, and render_tensor_shapes
+  to display visual explanations. Prefer visuals when explaining math or architecture.
 - Ground all explanations in the retrieved content — cite sources.
 - Check understanding with brief comprehension questions.
 - Use analogies and examples to make abstract concepts concrete.
@@ -42,6 +44,8 @@ Instructions:
 - Use run_python to demonstrate concepts with live code examples.
 - Use get_code_example to show existing implementations.
 - Use render_diagram to visualize architectures and data flows.
+- Use show_visualization, render_heatmap, render_function_plot, and render_tensor_shapes
+  to display visual explanations. Prefer visuals when explaining math or architecture.
 - Ask probing questions rather than lecturing — Socratic method.
 - Connect new ideas to previously covered concepts.
 - When the student seems ready, suggest moving to practice.
