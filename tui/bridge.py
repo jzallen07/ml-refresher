@@ -59,7 +59,7 @@ def create_session(
     on_text: Callable[[str], None],
     on_tool_start: Callable[[str, dict], None],
     on_tool_end: Callable[[str, dict], None],
-) -> SessionOrchestrator:
+) -> tuple[SessionOrchestrator, MLRefresherAPI]:
     resolved_model = model or DEFAULT_MODEL
     client = AsyncAnthropic()
     api = MLRefresherAPI()
@@ -74,4 +74,4 @@ def create_session(
         on_tool_end=on_tool_end,
     )
 
-    return SessionOrchestrator(mode=mode, topic=topic, agent=agent)
+    return SessionOrchestrator(mode=mode, topic=topic, agent=agent), api

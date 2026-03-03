@@ -38,3 +38,12 @@ def interview(topic, model):
     from tui.app import MLRefresherApp
 
     MLRefresherApp(mode="interviewer", topic=topic, model=model).run()
+
+
+@mlr.command()
+@click.option("--model", default=None, help="Model to use.")
+def tui(model):
+    """Launch interactive TUI with mode/topic selection."""
+    from tui.app import MLRefresherApp
+
+    MLRefresherApp(model=model).run()

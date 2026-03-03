@@ -5,8 +5,10 @@ from tui.app import MLRefresherApp
 
 def main():
     if len(sys.argv) < 3:
-        print("Usage: python -m tui <teacher|interviewer> <topic> [model]")
-        sys.exit(1)
+        # No mode/topic — launch with welcome screen
+        model = sys.argv[1] if len(sys.argv) > 1 else None
+        MLRefresherApp(model=model).run()
+        return
 
     mode = sys.argv[1]
     topic = sys.argv[2]

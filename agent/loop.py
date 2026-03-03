@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import asyncio
 import json
 from dataclasses import dataclass, field
 from typing import Callable, Awaitable
 
-from anthropic import AsyncAnthropic
+from anthropic import AsyncAnthropic, RateLimitError, APITimeoutError, APIConnectionError
 
 from agent.tools import ToolRegistry
+
+_RETRYABLE_ERRORS = (RateLimitError, APITimeoutError, APIConnectionError)
+_MAX_RETRIES = 3
 
 
 @dataclass
@@ -14,6 +18,7 @@ class AgentResponse:
     text: str
     tools_called: list[str]
     stop_reason: str
+    tool_results_data: dict[str, dict] = field(default_factory=dict)
 
 
 class AgentLoop:
@@ -60,15 +65,25 @@ class AgentLoop:
         if tool_choice:
             kwargs["tool_choice"] = tool_choice
 
-        # Stream the response
+        # Stream the response with retry on transient errors
         collected_text = ""
-        async with self._client.messages.stream(**kwargs) as stream:
-            async for text in stream.text_stream:
-                collected_text += text
+        message = None
+        for attempt in range(_MAX_RETRIES):
+            try:
+                async with self._client.messages.stream(**kwargs) as stream:
+                    async for text in stream.text_stream:
+                        collected_text += text
+                        if self._on_text:
+                            self._on_text(text)
+                message = await stream.get_final_message()
+                break
+            except _RETRYABLE_ERRORS:
+                if attempt == _MAX_RETRIES - 1:
+                    raise
+                collected_text = ""
                 if self._on_text:
-                    self._on_text(text)
-
-        message = await stream.get_final_message()
+                    self._on_text("\n\n*[Retrying...]*\n\n")
+                await asyncio.sleep(2 ** attempt)
 
         # Build assistant message content blocks
         assistant_content = []
@@ -88,6 +103,7 @@ class AgentLoop:
         # Execute tool calls
         tools_called = []
         tool_results = []
+        tool_results_data: dict[str, dict] = {}
         for block in message.content:
             if block.type != "tool_use":
                 continue
@@ -108,6 +124,8 @@ class AgentLoop:
             else:
                 result = {"error": f"Unknown tool: {tool_name}"}
 
+            tool_results_data[tool_name] = result
+
             if self._on_tool_end:
                 self._on_tool_end(tool_name, result)
 
@@ -124,4 +142,5 @@ class AgentLoop:
             text=collected_text,
             tools_called=tools_called,
             stop_reason=message.stop_reason,
+            tool_results_data=tool_results_data,
         )

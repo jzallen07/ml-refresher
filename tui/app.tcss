@@ -44,6 +44,12 @@
     margin: 1 2;
 }
 
+.tool-error {
+    color: $warning;
+    text-style: italic;
+    margin: 0 2;
+}
+
 Input {
     dock: bottom;
 }
