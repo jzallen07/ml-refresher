@@ -57,6 +57,7 @@ class Sidebar(Static):
 
         lines.append("")
         lines.append("[dim]ctrl+p Dashboard[/dim]")
+        lines.append("[dim]/help Commands[/dim]")
 
         self.update("\n".join(lines))
 

@@ -1,29 +1,33 @@
 from __future__ import annotations
 
+import asyncio
+
 from cli.api import MLRefresherAPI
 from agent.tools import Tool
 
 
 def make_content_tools(api: MLRefresherAPI) -> list[Tool]:
     async def search_content(input: dict) -> dict:
-        return {
-            "results": api.search_content(
-                query=input["query"],
-                topic=input.get("topic"),
-                source_type=input.get("source_type"),
-                has_code=input.get("has_code"),
-                limit=input.get("limit", 5),
-            )
-        }
+        results = await asyncio.to_thread(
+            api.search_content,
+            query=input["query"],
+            topic=input.get("topic"),
+            source_type=input.get("source_type"),
+            has_code=input.get("has_code"),
+            limit=input.get("limit", 5),
+        )
+        return {"results": results}
 
     async def get_lesson(input: dict) -> dict:
-        result = api.get_lesson(input["lesson_id"])
+        result = await asyncio.to_thread(api.get_lesson, input["lesson_id"])
         if result is None:
             return {"error": f"Lesson '{input['lesson_id']}' not found"}
         return result
 
     async def get_question(input: dict) -> dict:
-        result = api.get_question_with_rubric(input["question_id"])
+        result = await asyncio.to_thread(
+            api.get_question_with_rubric, input["question_id"]
+        )
         if result is None:
             return {"error": f"Question '{input['question_id']}' not found"}
         return result

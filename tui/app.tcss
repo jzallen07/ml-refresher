@@ -50,6 +50,8 @@
     margin: 0 2;
 }
 
-Input {
+#user-input {
     dock: bottom;
+    height: 3;
+    max-height: 8;
 }
