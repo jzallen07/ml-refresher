@@ -1,11 +1,12 @@
 # ML Refresher
 
-A comprehensive learning repository for Machine Learning concepts, PyTorch fundamentals, and LLM interview preparation.
+A comprehensive learning repository for Machine Learning concepts, PyTorch fundamentals, and LLM interview preparation — with an interactive TUI powered by Claude.
 
 ## Requirements
 
 - Python 3.12+
 - [uv](https://github.com/astral-sh/uv) package manager
+- `OPENROUTER_API_KEY` environment variable (for interactive sessions)
 
 ## Setup
 
@@ -13,13 +14,64 @@ A comprehensive learning repository for Machine Learning concepts, PyTorch funda
 # Install dependencies
 uv sync
 
-# Run any script
-uv run python <script_path>
+# Set your API key
+export OPENROUTER_API_KEY=sk-or-...
+
+# Build the search index (first time only)
+uv run mlr index build
+```
+
+## Interactive Sessions
+
+The `mlr` CLI provides two LLM-powered session modes that use a phased agentic architecture with Claude:
+
+### Teacher Mode
+
+Socratic tutor that guides you through lessons, adapts to your level, and runs live code demos.
+
+```bash
+uv run mlr learn attention_mechanisms
+```
+
+Phases: warmup → introduce → explore → practice → wrapup
+
+### Interviewer Mode
+
+Mock ML interviewer that asks adaptive questions from the 50+ question bank, evaluates your answers with rubric scoring, and gives detailed feedback.
+
+```bash
+uv run mlr interview attention_mechanisms
+```
+
+Phases: setup → question → followup → evaluate → debrief (loops for 3 questions)
+
+### TUI
+
+Launch the full terminal UI with mode/topic selection, a live sidebar showing phase progress, and a progress dashboard (`ctrl+p`):
+
+```bash
+uv run mlr tui
+```
+
+Both modes share persistent state across sessions — FSRS spaced repetition scheduling tracks concept mastery and prioritizes weak areas for review.
+
+## CLI Reference
+
+```bash
+uv run mlr content topics                          # List all topics
+uv run mlr content questions attention_mechanisms   # List questions in a topic
+uv run mlr content next-question attention_mechanisms  # FSRS-aware question selection
+uv run mlr content search "transformer architecture"   # Semantic + keyword search
+uv run mlr progress show                            # View learning progress
+uv run mlr progress schedule                        # View spaced-repetition schedule
+uv run mlr code run <file>                          # Execute a code example
+uv run mlr diagram list                             # List available diagrams
+uv run mlr index build                              # Build/rebuild search index
 ```
 
 ## Interactive Book UI
 
-This repo includes Jupyter Book for an interactive browsing experience:
+This repo also includes Jupyter Book for a browser-based reading experience:
 
 ```bash
 # Start the local book server (read-only)
@@ -46,9 +98,29 @@ The book auto-discovers new content - just add a folder with a `README.md` and i
 
 ```
 ml-refresher/
+  agent/                 # Agentic LLM layer
+    tools/               #   Tool implementations (12 tools)
+    orchestrator.py      #   Phase-based session orchestrator
+    loop.py              #   Claude API agent loop with streaming
+    phases.py            #   Teacher & interviewer phase configs
+    prompts.py           #   System prompts per phase
+    harness.py           #   Tool registry builder
+  tui/                   # Textual TUI application
+    app.py               #   Main app with chat interface
+    screens.py           #   Welcome screen, progress dashboard
+    widgets.py           #   Sidebar, tool indicators
+    bridge.py            #   TUI ↔ agent integration
+  cli/                   # CLI entry point (mlr command)
+    commands/            #   Click command groups
+    services/            #   Content parsing, search, code execution
+    state/               #   SQLite state, FSRS scheduling, progress
+    rubrics/             #   Question rubrics with scoring criteria
+    api.py               #   Unified API surface for all operations
   pytorch_refresher/     # PyTorch fundamentals (10 lessons)
   interview_questions/   # LLM interview prep (50 questions, 21 categories)
   data/                  # Generated outputs and visualizations
+  docs/                  # TUI PRD and model guide
+  scripts/               # Evaluation and utility scripts
 ```
 
 ## PyTorch Refresher

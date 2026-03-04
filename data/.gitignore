@@ -2,3 +2,6 @@
 *
 !.gitignore
 !.gitkeep
+!concept_graph.json
+!viz_library/
+!viz_library/**

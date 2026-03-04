@@ -1,0 +1,45 @@
+#chat-scroll {
+    height: 1fr;
+}
+
+.user-message {
+    background: $primary 15%;
+    border: solid $primary-background;
+    padding: 1 2;
+    margin: 1 2;
+}
+
+.agent-message {
+    margin: 1 2;
+}
+
+.tool-indicator {
+    color: $text-muted;
+    text-style: italic;
+    margin: 0 2;
+}
+
+.error-message {
+    color: $error;
+    padding: 1 2;
+    margin: 1 2;
+}
+
+.tool-error {
+    color: $warning;
+    text-style: italic;
+    margin: 0 2;
+}
+
+VisualizationWidget {
+    margin: 1 2;
+    height: auto;
+    background: $surface;
+    border: round $secondary;
+}
+
+#user-input {
+    dock: bottom;
+    height: 3;
+    max-height: 8;
+}
