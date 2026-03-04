@@ -107,8 +107,12 @@ def get_questions(topic: str) -> list[dict] | None:
 def get_question(q_id: str) -> dict | None:
     """Find a question by its ID.
 
-    Supports bare IDs ('Q2') and compound IDs ('attention_mechanisms_q2').
+    Supports bare IDs ('Q2'), compound IDs ('attention_mechanisms_q2'),
+    and graph-prefixed IDs ('question:embeddings_q10').
     """
+    # Strip graph prefix if present
+    q_id = q_id.removeprefix("question:")
+
     # Check for compound ID: topic_qN
     compound_match = re.match(r"^(.+?)_([qQ]\d+)$", q_id)
     if compound_match:

@@ -33,7 +33,12 @@ class MLRefresherAPI:
         return results
 
     def get_lesson(self, lesson_id: str) -> dict | None:
-        return get_lesson(lesson_id)
+        result = get_lesson(lesson_id)
+        if result is not None:
+            return result
+        # Fall back to question lookup for IDs like "question:embeddings_q10"
+        q_id = lesson_id.removeprefix("question:")
+        return get_question_with_rubric(q_id) or get_question(q_id)
 
     def get_questions(self, topic: str) -> list[dict] | None:
         return get_questions(topic)

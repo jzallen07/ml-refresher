@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import platform
+import subprocess
+
 from textual.widgets import Static
 
 try:
@@ -13,7 +16,7 @@ except ImportError:
 
 
 class VisualizationWidget(Static):
-    """Displays a matplotlib PNG inline using half-block Unicode characters."""
+    """Displays a matplotlib PNG inline and opens it in the system viewer."""
 
     DEFAULT_CSS = """
     VisualizationWidget {
@@ -30,19 +33,31 @@ class VisualizationWidget(Static):
 
     def on_mount(self) -> None:
         self._render_image()
+        self._open_externally()
+
+    def _open_externally(self) -> None:
+        """Open the image in the system's default viewer for full-res viewing."""
+        try:
+            if platform.system() == "Darwin":
+                subprocess.Popen(["open", self._image_path])
+            elif platform.system() == "Linux":
+                subprocess.Popen(["xdg-open", self._image_path])
+        except OSError:
+            pass
 
     def _render_image(self) -> None:
         if not _HAS_RICH_PIXELS:
-            self.update(f"[dim][Visualization: {self._title}][/dim]")
+            self.update(
+                f"[dim][Visualization: {self._title} — opened externally][/dim]"
+            )
             return
 
         try:
             img = Image.open(self._image_path)
 
-            # Resize to ~80% of terminal width, max 120 columns.
-            # Each pixel maps to half a character cell, so target width in
-            # pixels is roughly 2x the desired column count.
-            term_width = min(self.app.size.width - 6, 120) if self.app else 80
+            # Use full terminal width for maximum detail.
+            # Each column = 2 pixels wide (half-block chars), each row = 2 pixels tall.
+            term_width = min(self.app.size.width - 4, 160) if self.app else 100
             target_px = term_width * 2
             if img.width > target_px:
                 ratio = target_px / img.width
@@ -52,7 +67,13 @@ class VisualizationWidget(Static):
                 )
 
             pixels = Pixels.from_image(img)
-            panel = Panel(pixels, title=self._title, border_style="cyan", expand=False)
+            panel = Panel(
+                pixels,
+                title=self._title,
+                subtitle="[dim]opened in viewer[/dim]",
+                border_style="cyan",
+                expand=False,
+            )
             self.update(panel)
         except Exception as exc:
             self.update(f"[dim][Could not render visualization: {exc}][/dim]")

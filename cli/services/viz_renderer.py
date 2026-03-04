@@ -17,8 +17,8 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
 _STYLE = "dark_background"
-_DPI = 150
-_FIGSIZE = (6, 4)  # 600x400 at 150 DPI
+_DPI = 200
+_FIGSIZE = (8, 5)  # 1600x1000 at 200 DPI
 
 DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "viz_library"
 MANIFEST_PATH = DATA_DIR / "manifest.json"

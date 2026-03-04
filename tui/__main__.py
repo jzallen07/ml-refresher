@@ -1,4 +1,7 @@
+import os
 import sys
+
+os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 
 from tui.app import MLRefresherApp
 

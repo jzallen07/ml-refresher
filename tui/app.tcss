@@ -1,16 +1,5 @@
-#main-container {
-    height: 1fr;
-}
-
-#sidebar {
-    width: 24;
-    background: $surface;
-    border-right: solid $primary-background;
-    padding: 1 2;
-}
-
 #chat-scroll {
-    width: 1fr;
+    height: 1fr;
 }
 
 .user-message {
@@ -28,14 +17,6 @@
     color: $text-muted;
     text-style: italic;
     margin: 0 2;
-}
-
-.phase-current {
-    text-style: bold;
-}
-
-.phase-done {
-    color: $text-muted;
 }
 
 .error-message {

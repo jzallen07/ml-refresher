@@ -8,15 +8,23 @@ from agent.tools import Tool
 
 def make_content_tools(api: MLRefresherAPI) -> list[Tool]:
     async def search_content(input: dict) -> dict:
-        results = await asyncio.to_thread(
-            api.search_content,
-            query=input["query"],
-            topic=input.get("topic"),
-            source_type=input.get("source_type"),
-            has_code=input.get("has_code"),
-            limit=input.get("limit", 5),
-            include_graph_context=input.get("include_graph_context", False),
-        )
+        async def _do_search():
+            return await asyncio.to_thread(
+                api.search_content,
+                query=input["query"],
+                topic=input.get("topic"),
+                source_type=input.get("source_type"),
+                has_code=input.get("has_code"),
+                limit=input.get("limit", 5),
+                include_graph_context=input.get("include_graph_context", False),
+            )
+
+        try:
+            results = await _do_search()
+        except OSError:
+            # Retry once — transient fd issue from subprocess fork in async context
+            await asyncio.sleep(0.1)
+            results = await _do_search()
         return {"results": results}
 
     async def get_lesson(input: dict) -> dict:
